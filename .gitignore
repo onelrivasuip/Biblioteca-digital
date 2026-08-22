@@ -26,3 +26,4 @@ storage/
 
 # macOS
 .DS_Storebiblioteca_app.egg-info/
+.env

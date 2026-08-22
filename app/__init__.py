@@ -1,12 +1,12 @@
 from flask import Flask, flash, redirect, render_template, request, url_for
 
+from dao.libro_dao import LibroDAO
+
 
 def crear_app():
     """Crea y configura la aplicación Flask."""
     app = Flask(__name__)
     app.config["SECRET_KEY"] = "biblioteca-clave-desarrollo"
-
-    libros = []
 
     @app.route("/", methods=["GET", "POST"])
     def inicio():
@@ -19,26 +19,30 @@ def crear_app():
                 flash("Todos los campos son obligatorios.", "error")
                 return redirect(url_for("inicio"))
 
-            isbn_duplicado = any(
-                libro["isbn"].lower() == isbn.lower()
-                for libro in libros
-            )
+            try:
+                if LibroDAO.buscar_por_isbn(isbn):
+                    flash("Ya existe un libro con ese ISBN.", "error")
+                    return redirect(url_for("inicio"))
 
-            if isbn_duplicado:
-                flash("Ya existe un libro con ese ISBN.", "error")
-                return redirect(url_for("inicio"))
+                LibroDAO.crear(titulo, autor, isbn)
+                flash("Libro registrado correctamente.", "exito")
 
-            libros.append(
-                {
-                    "titulo": titulo,
-                    "autor": autor,
-                    "isbn": isbn,
-                    "disponible": True,
-                }
-            )
+            except Exception:
+                flash(
+                    "No fue posible registrar el libro en MySQL.",
+                    "error",
+                )
 
-            flash("Libro registrado correctamente.", "exito")
             return redirect(url_for("inicio"))
+
+        try:
+            libros = LibroDAO.listar()
+        except Exception:
+            libros = []
+            flash(
+                "No fue posible consultar los libros en MySQL.",
+                "error",
+            )
 
         total_libros = len(libros)
         disponibles = sum(
