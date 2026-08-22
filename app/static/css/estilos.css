@@ -272,5 +272,28 @@ hr {
     .libro {
         align-items: flex-start;
         flex-direction: column;
+        }
+  } 
+
+    .mensajes {
+    margin: 20px 0;
     }
-}
+
+    .mensaje {
+    padding: 14px 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    }
+
+    .mensaje.exito {
+    color: #256029;
+    background: #e8f5e9;
+    border: 1px solid #81c784;
+    }
+
+    .mensaje.error {
+    color: #9b1c1c;
+    background: #fdecec;
+    border: 1px solid #ef9a9a;
+
+    }

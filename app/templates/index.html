@@ -73,7 +73,19 @@
                 <button type="button">📊 Reportes</button>
             </nav>
 
-            <!-- Sección de libros -->
+            {% with mensajes = get_flashed_messages(with_categories=true) %}
+             {% if mensajes %}
+            <div class="mensajes">
+            {% for categoria, mensaje in mensajes %}
+                <div class="mensaje {{ categoria }}">
+                    {{ mensaje }}
+                </div>
+            {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+            
+             <!-- Sección de libros -->
             <section class="panel" id="libros">
 
                 <h2>Registrar nuevo libro</h2>
