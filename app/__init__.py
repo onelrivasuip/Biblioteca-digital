@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 
 
 def crear_app():
@@ -7,6 +7,13 @@ def crear_app():
 
     @app.route("/")
     def inicio():
-        return "<h1>Biblioteca Digital</h1><p>Aplicación Flask funcionando correctamente.</p>"
+        return render_template(
+            "index.html",
+            total_libros=0,
+            disponibles=0,
+            prestados=0,
+            total_clientes=0,
+            libros=[],
+        )
 
     return app
