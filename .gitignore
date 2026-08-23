@@ -25,4 +25,5 @@ storage/
 .vscode/
 
 # macOS
-.DS_Store
+.DS_Storebiblioteca_app.egg-info/
+.env
