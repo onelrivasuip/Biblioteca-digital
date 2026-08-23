@@ -59,4 +59,70 @@ def crear_app():
             total_clientes=0,
         )
 
+    @app.route("/libros/<int:libro_id>/editar", methods=["GET", "POST"])
+    def editar_libro(libro_id):
+        """Muestra y procesa el formulario para editar un libro."""
+        libro = LibroDAO.buscar_por_id(libro_id)
+
+        if libro is None:
+            flash("El libro solicitado no existe.", "error")
+            return redirect(url_for("inicio"))
+
+        if request.method == "POST":
+            titulo = request.form.get("titulo", "").strip()
+            autor = request.form.get("autor", "").strip()
+            isbn = request.form.get("isbn", "").strip()
+            categoria = request.form.get("categoria", "").strip() or None
+
+            if not titulo or not autor or not isbn:
+                flash("Título, autor e ISBN son obligatorios.", "error")
+                return redirect(
+                    url_for("editar_libro", libro_id=libro_id)
+                )
+
+            libro_con_isbn = LibroDAO.buscar_por_isbn(isbn)
+
+            if (
+                libro_con_isbn
+                and libro_con_isbn["id"] != libro_id
+            ):
+                flash("Ya existe otro libro con ese ISBN.", "error")
+                return redirect(
+                    url_for("editar_libro", libro_id=libro_id)
+                )
+
+            try:
+                LibroDAO.actualizar(
+                    libro_id,
+                    titulo,
+                    autor,
+                    isbn,
+                    categoria,
+                )
+                flash("Libro actualizado correctamente.", "exito")
+                return redirect(url_for("inicio"))
+            except Exception:
+                flash("No fue posible actualizar el libro.", "error")
+
+        return render_template("editar_libro.html", libro=libro)
+
+    @app.route("/libros/<int:libro_id>/eliminar", methods=["POST"])
+    def eliminar_libro(libro_id):
+        """Elimina un libro registrado."""
+        try:
+            filas_eliminadas = LibroDAO.eliminar(libro_id)
+
+            if filas_eliminadas:
+                flash("Libro eliminado correctamente.", "exito")
+            else:
+                flash("El libro solicitado no existe.", "error")
+
+        except Exception:
+            flash(
+                "No fue posible eliminar el libro. "
+                "Puede tener préstamos asociados.",
+                "error",
+            )
+
+        return redirect(url_for("inicio"))
     return app

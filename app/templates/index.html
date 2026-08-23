@@ -84,7 +84,7 @@
             </div>
             {% endif %}
             {% endwith %}
-            
+
              <!-- Sección de libros -->
             <section class="panel" id="libros">
 
@@ -144,11 +144,17 @@
                                         {{ libro.autor }}
                                         · ISBN: {{ libro.isbn }}
                                     </p>
-                                </div>
-
+                                </div>                              
                                 <span class="estado">
                                     Disponible
                                 </span>
+                                <div>
+                                    <form method="post">
+                                    <button type="submit">
+                                    Eliminar
+                                    </button>
+                                    </form>
+                                </div>
                             </article>
 
                         {% endfor %}
