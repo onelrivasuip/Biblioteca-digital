@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block titulo %}Préstamos — Biblioteca Central{% endblock %}
+
+{% block contenido %}
+
+<section class="panel" id="prestamos">
+
+    <h2>Registrar nuevo préstamo</h2>
+
+    <form class="formulario" method="post" action="{{ url_for('prestamos.index') }}">
+
+        <div class="campos">
+            <select name="libro_id" required>
+                <option value="" disabled selected>Selecciona un libro disponible</option>
+                {% for libro in libros_disponibles %}
+                <option value="{{ libro.id }}">{{ libro.titulo }} — {{ libro.autor }}</option>
+                {% endfor %}
+            </select>
+
+            <select name="usuario_id" required>
+                <option value="" disabled selected>Selecciona un cliente</option>
+                {% for cliente in clientes %}
+                <option value="{{ cliente.id }}">{{ cliente.nombre }} {{ cliente.apellido }} ({{ cliente.cedula }})</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        {% if not libros_disponibles %}
+        <p class="vacio">No hay libros disponibles para prestar en este momento.</p>
+        {% endif %}
+
+        <button class="boton-principal" type="submit" {{ 'disabled' if not libros_disponibles or not clientes }}>
+            ＋ Registrar préstamo
+        </button>
+
+    </form>
+
+    <hr>
+
+    <h2>Préstamos activos</h2>
+
+    {% if prestamos %}
+
+        <div class="tabla-wrap">
+            <table class="tabla">
+                <thead>
+                    <tr>
+                        <th>Libro</th>
+                        <th>Cliente</th>
+                        <th>Fecha de préstamo</th>
+                        <th>Fecha límite</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prestamo in prestamos %}
+                    <tr>
+                        <td>{{ prestamo.libro_titulo }}</td>
+                        <td>{{ prestamo.usuario_nombre }}</td>
+                        <td>{{ prestamo.fecha_prestamo }}</td>
+                        <td>{{ prestamo.fecha_limite }}</td>
+                        <td>
+                            <form
+                                method="post"
+                                action="{{ url_for('prestamos.devolver', prestamo_id=prestamo.id) }}"
+                            >
+                                <button type="submit">Devolver</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    {% else %}
+
+        <p class="vacio">No hay préstamos activos en este momento.</p>
+
+    {% endif %}
+
+</section>
+
+{% endblock %}

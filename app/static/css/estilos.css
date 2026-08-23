@@ -127,10 +127,12 @@ input {
     border-bottom: 1px solid var(--borde);
 }
 
-.navegacion button {
+.navegacion a {
+    display: inline-block;
     padding: 12px 17px;
     color: var(--texto-secundario);
     font-weight: 600;
+    text-decoration: none;
     white-space: nowrap;
     cursor: pointer;
     background: transparent;
@@ -138,8 +140,12 @@ input {
     border-bottom: 3px solid transparent;
 }
 
-.navegacion button:first-child,
-.navegacion button:hover {
+.navegacion a:hover {
+    color: var(--azul);
+    border-bottom-color: var(--azul);
+}
+
+.navegacion a.activo {
     color: var(--azul);
     border-bottom-color: var(--azul);
 }
@@ -164,7 +170,8 @@ input {
     margin-bottom: 15px;
 }
 
-.campos input {
+.campos input,
+.campos select {
     width: 100%;
     padding: 14px 15px;
     color: var(--texto);
@@ -174,7 +181,8 @@ input {
     outline: none;
 }
 
-.campos input:focus {
+.campos input:focus,
+.campos select:focus {
     border-color: var(--azul);
     box-shadow: 0 0 0 3px rgba(65, 103, 143, 0.15);
 }
@@ -191,6 +199,108 @@ input {
 
 .boton-principal:hover {
     background: var(--azul-oscuro);
+}
+
+.boton-principal:disabled {
+    cursor: not-allowed;
+    background: #aeb7c2;
+}
+
+.boton-secundario {
+    display: inline-block;
+    padding: 10px 16px;
+    color: var(--azul);
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    background: transparent;
+    border: 1px solid var(--azul);
+    border-radius: 8px;
+}
+
+.boton-secundario:hover {
+    color: white;
+    background: var(--azul);
+}
+
+.busqueda {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.busqueda input {
+    flex: 1;
+    padding: 12px 14px;
+    color: var(--texto);
+    background: var(--superficie);
+    border: 1px solid #aeb7c2;
+    border-radius: 7px;
+    outline: none;
+}
+
+.busqueda input:focus {
+    border-color: var(--azul);
+    box-shadow: 0 0 0 3px rgba(65, 103, 143, 0.15);
+}
+
+.resumen-total {
+    margin: 0 0 18px;
+    font-size: 16px;
+    color: var(--texto-secundario);
+}
+
+.resumen-total strong {
+    color: var(--naranja);
+    font-size: 20px;
+}
+
+.tabla-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--borde);
+    border-radius: 9px;
+}
+
+.tabla {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tabla th,
+.tabla td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--borde);
+    white-space: nowrap;
+}
+
+.tabla thead th {
+    color: var(--texto-secundario);
+    font-size: 13px;
+    text-transform: uppercase;
+    background: var(--fondo);
+}
+
+.tabla tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.tabla tbody tr:hover {
+    background: rgba(65, 103, 143, 0.05);
+}
+
+.tabla button {
+    padding: 8px 14px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    background: var(--naranja);
+    border: 0;
+    border-radius: 6px;
+}
+
+.tabla button:hover {
+    opacity: 0.85;
 }
 
 hr {
@@ -227,6 +337,30 @@ hr {
     font-weight: 700;
     background: var(--verde);
     border-radius: 20px;
+}
+
+.estado.prestado {
+    background: var(--naranja);
+}
+
+.acciones {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.acciones form button {
+    padding: 10px 16px;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    background: var(--naranja);
+    border: 0;
+    border-radius: 8px;
+}
+
+.acciones form button:hover {
+    opacity: 0.85;
 }
 
 .vacio {

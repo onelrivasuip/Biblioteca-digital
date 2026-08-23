@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>{% block titulo %}Biblioteca Central{% endblock %}</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+</head>
+
+<body>
+    <main class="contenedor">
+
+        <!-- Encabezado -->
+        <header class="encabezado">
+            <div>
+                <h1>📖 Biblioteca Central</h1>
+                <p>
+                    Sistema de control de libros, clientes, préstamos,
+                    multas y reportes
+                </p>
+            </div>
+        </header>
+
+        <section class="contenido">
+
+            <!-- Tarjetas de estadísticas -->
+            {% if resumen %}
+            <div class="estadisticas">
+
+                <article class="tarjeta azul">
+                    <p>📘 Total de libros</p>
+                    <strong>{{ resumen.total_libros }}</strong>
+                </article>
+
+                <article class="tarjeta verde">
+                    <p>✅ Disponibles</p>
+                    <strong>{{ resumen.disponibles }}</strong>
+                </article>
+
+                <article class="tarjeta naranja">
+                    <p>↔ Prestados</p>
+                    <strong>{{ resumen.prestados }}</strong>
+                </article>
+
+                <article class="tarjeta morada">
+                    <p>👥 Clientes</p>
+                    <strong>{{ resumen.total_usuarios }}</strong>
+                </article>
+
+            </div>
+            {% endif %}
+
+            <!-- Menú principal -->
+            <nav class="navegacion">
+                <a
+                    class="{{ 'activo' if request.endpoint == 'libros.index' else '' }}"
+                    href="{{ url_for('libros.index') }}"
+                >📚 Libros</a>
+                <a
+                    class="{{ 'activo' if request.endpoint == 'clientes.index' else '' }}"
+                    href="{{ url_for('clientes.index') }}"
+                >👥 Clientes</a>
+                <a
+                    class="{{ 'activo' if request.endpoint == 'prestamos.index' else '' }}"
+                    href="{{ url_for('prestamos.index') }}"
+                >↔ Préstamos</a>
+                <a
+                    class="{{ 'activo' if request.endpoint == 'multas.index' else '' }}"
+                    href="{{ url_for('multas.index') }}"
+                >💵 Multas{% if resumen and resumen.multas_pendientes %} (${{ '%.2f' | format(resumen.multas_pendientes) }}){% endif %}</a>
+                <a
+                    class="{{ 'activo' if request.endpoint == 'reportes.index' else '' }}"
+                    href="{{ url_for('reportes.index') }}"
+                >📊 Reportes</a>
+            </nav>
+
+            {% with mensajes = get_flashed_messages(with_categories=true) %}
+             {% if mensajes %}
+            <div class="mensajes">
+            {% for categoria, mensaje in mensajes %}
+                <div class="mensaje {{ categoria }}">
+                    {{ mensaje }}
+                </div>
+            {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+
+            {% block contenido %}{% endblock %}
+
+        </section>
+
+    </main>
+</body>
+</html>

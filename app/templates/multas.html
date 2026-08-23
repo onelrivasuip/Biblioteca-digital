@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block titulo %}Multas — Biblioteca Central{% endblock %}
+
+{% block contenido %}
+
+<section class="panel" id="multas">
+
+    <h2>Multas pendientes</h2>
+
+    <p class="resumen-total">
+        Total adeudado: <strong>${{ '%.2f' | format(total_pendiente) }}</strong>
+    </p>
+
+    {% if multas %}
+
+        <div class="tabla-wrap">
+            <table class="tabla">
+                <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Libro</th>
+                        <th>Días de atraso</th>
+                        <th>Monto</th>
+                        <th>Generada</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for multa in multas %}
+                    <tr>
+                        <td>{{ multa.usuario_nombre }}</td>
+                        <td>{{ multa.libro_titulo }}</td>
+                        <td>{{ multa.dias_atraso }}</td>
+                        <td>${{ '%.2f' | format(multa.monto) }}</td>
+                        <td>{{ multa.fecha_generacion }}</td>
+                        <td>
+                            <form
+                                method="post"
+                                action="{{ url_for('multas.pagar', multa_id=multa.id) }}"
+                                onsubmit="return confirm('¿Marcar esta multa como pagada?');"
+                            >
+                                <button type="submit">Marcar pagada</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    {% else %}
+
+        <p class="vacio">No hay multas pendientes. 🎉</p>
+
+    {% endif %}
+
+</section>
+
+{% endblock %}

@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block titulo %}Reportes — Biblioteca Central{% endblock %}
+
+{% block contenido %}
+
+<section class="panel" id="reportes">
+
+    <h2>📕 Préstamos atrasados</h2>
+
+    {% if atrasados %}
+        <div class="tabla-wrap">
+            <table class="tabla">
+                <thead>
+                    <tr>
+                        <th>Libro</th>
+                        <th>Cliente</th>
+                        <th>Fecha límite</th>
+                        <th>Días de atraso</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prestamo in atrasados %}
+                    <tr>
+                        <td>{{ prestamo.libro_titulo }}</td>
+                        <td>{{ prestamo.usuario_nombre }}</td>
+                        <td>{{ prestamo.fecha_limite }}</td>
+                        <td>{{ prestamo.dias_atraso }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="vacio">No hay préstamos atrasados. 🎉</p>
+    {% endif %}
+
+    <hr>
+
+    <h2>🏆 Libros más prestados</h2>
+
+    {% if mas_prestados %}
+        <div class="tabla-wrap">
+            <table class="tabla">
+                <thead>
+                    <tr>
+                        <th>Título</th>
+                        <th>Autor</th>
+                        <th>Veces prestado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for libro in mas_prestados %}
+                    <tr>
+                        <td>{{ libro.titulo }}</td>
+                        <td>{{ libro.autor }}</td>
+                        <td>{{ libro.veces_prestado }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="vacio">Todavía no hay préstamos registrados.</p>
+    {% endif %}
+
+    <hr>
+
+    <h2>💵 Multas pendientes</h2>
+
+    <p class="resumen-total">
+        Total adeudado: <strong>${{ '%.2f' | format(total_pendiente) }}</strong>
+    </p>
+
+    {% if multas_pendientes %}
+        <div class="tabla-wrap">
+            <table class="tabla">
+                <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Libro</th>
+                        <th>Días de atraso</th>
+                        <th>Monto</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for multa in multas_pendientes %}
+                    <tr>
+                        <td>{{ multa.usuario_nombre }}</td>
+                        <td>{{ multa.libro_titulo }}</td>
+                        <td>{{ multa.dias_atraso }}</td>
+                        <td>${{ '%.2f' | format(multa.monto) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="vacio">No hay multas pendientes.</p>
+    {% endif %}
+
+</section>
+
+{% endblock %}

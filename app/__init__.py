@@ -1,128 +1,76 @@
-from flask import Flask, flash, redirect, render_template, request, url_for
+"""
+app/__init__.py
+
+Application factory de Flask: crea la app, la configura y registra cada
+sección (Libros, Clientes, Préstamos, Multas, Reportes) como su propio
+blueprint — así cada archivo de rutas se puede leer y mantener por separado
+en vez de tener todas las rutas mezcladas en un solo módulo.
+"""
+
+import os
+
+from flask import Flask
+from dotenv import load_dotenv
 
 from dao.libro_dao import LibroDAO
+from dao.multa_dao import MultaDAO
+from dao.usuario_dao import UsuarioDAO
+from dao.prestamo_dao import PrestamoDAO
+from utils.excepciones import BibliotecaError
+from utils.logger import get_logger
+
+load_dotenv()
+
+logger = get_logger(__name__)
 
 
 def crear_app():
-    """Crea y configura la aplicación Flask."""
+    """Crea y configura la aplicación Flask (application factory)."""
     app = Flask(__name__)
-    app.config["SECRET_KEY"] = "biblioteca-clave-desarrollo"
+    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "biblioteca-clave-desarrollo")
 
-    @app.route("/", methods=["GET", "POST"])
-    def inicio():
-        if request.method == "POST":
-            titulo = request.form.get("titulo", "").strip()
-            autor = request.form.get("autor", "").strip()
-            isbn = request.form.get("isbn", "").strip()
+    from app.routes.libros import libros_bp
+    from app.routes.clientes import clientes_bp
+    from app.routes.prestamos import prestamos_bp
+    from app.routes.multas import multas_bp
+    from app.routes.reportes import reportes_bp
 
-            if not titulo or not autor or not isbn:
-                flash("Todos los campos son obligatorios.", "error")
-                return redirect(url_for("inicio"))
+    app.register_blueprint(libros_bp)
+    app.register_blueprint(clientes_bp)
+    app.register_blueprint(prestamos_bp)
+    app.register_blueprint(multas_bp)
+    app.register_blueprint(reportes_bp)
 
-            try:
-                if LibroDAO.buscar_por_isbn(isbn):
-                    flash("Ya existe un libro con ese ISBN.", "error")
-                    return redirect(url_for("inicio"))
-
-                LibroDAO.crear(titulo, autor, isbn)
-                flash("Libro registrado correctamente.", "exito")
-
-            except Exception:
-                flash(
-                    "No fue posible registrar el libro en MySQL.",
-                    "error",
-                )
-
-            return redirect(url_for("inicio"))
-
+    @app.context_processor
+    def inyectar_resumen():
+        """Calcula las estadísticas de la barra superior en cada request, para
+        que todas las plantillas (que extienden base.html) las tengan
+        disponibles sin que cada ruta tenga que pasarlas a mano."""
         try:
-            libros = LibroDAO.listar()
-        except Exception:
-            libros = []
-            flash(
-                "No fue posible consultar los libros en MySQL.",
-                "error",
-            )
+            total_libros, disponibles, prestados = LibroDAO.contar_por_disponibilidad()
+            return {
+                "resumen": {
+                    "total_libros": total_libros,
+                    "disponibles": disponibles,
+                    "prestados": prestados,
+                    "total_usuarios": UsuarioDAO.contar(),
+                    "prestamos_activos": PrestamoDAO.contar_activos(),
+                    "multas_pendientes": MultaDAO.total_pendiente(),
+                }
+            }
+        except BibliotecaError as error:
+            logger.error("No se pudo calcular el resumen de estadísticas: %s", error)
+            return {"resumen": None}
 
-        total_libros = len(libros)
-        disponibles = sum(
-            1 for libro in libros if libro["disponible"]
-        )
-        prestados = total_libros - disponibles
+    @app.errorhandler(404)
+    def pagina_no_encontrada(_error):
+        """Página de error 404 simple (evita el traceback genérico de Flask)."""
+        return "Página no encontrada.", 404
 
-        return render_template(
-            "index.html",
-            libros=libros,
-            total_libros=total_libros,
-            disponibles=disponibles,
-            prestados=prestados,
-            total_clientes=0,
-        )
+    @app.errorhandler(500)
+    def error_interno(error):
+        """Registra el error interno en el log y muestra un mensaje genérico."""
+        logger.error("Error interno no manejado: %s", error, exc_info=True)
+        return "Ocurrió un error interno. Revisa logs/app.log para más detalle.", 500
 
-    @app.route("/libros/<int:libro_id>/editar", methods=["GET", "POST"])
-    def editar_libro(libro_id):
-        """Muestra y procesa el formulario para editar un libro."""
-        libro = LibroDAO.buscar_por_id(libro_id)
-
-        if libro is None:
-            flash("El libro solicitado no existe.", "error")
-            return redirect(url_for("inicio"))
-
-        if request.method == "POST":
-            titulo = request.form.get("titulo", "").strip()
-            autor = request.form.get("autor", "").strip()
-            isbn = request.form.get("isbn", "").strip()
-            categoria = request.form.get("categoria", "").strip() or None
-
-            if not titulo or not autor or not isbn:
-                flash("Título, autor e ISBN son obligatorios.", "error")
-                return redirect(
-                    url_for("editar_libro", libro_id=libro_id)
-                )
-
-            libro_con_isbn = LibroDAO.buscar_por_isbn(isbn)
-
-            if (
-                libro_con_isbn
-                and libro_con_isbn["id"] != libro_id
-            ):
-                flash("Ya existe otro libro con ese ISBN.", "error")
-                return redirect(
-                    url_for("editar_libro", libro_id=libro_id)
-                )
-
-            try:
-                LibroDAO.actualizar(
-                    libro_id,
-                    titulo,
-                    autor,
-                    isbn,
-                    categoria,
-                )
-                flash("Libro actualizado correctamente.", "exito")
-                return redirect(url_for("inicio"))
-            except Exception:
-                flash("No fue posible actualizar el libro.", "error")
-
-        return render_template("editar_libro.html", libro=libro)
-
-    @app.route("/libros/<int:libro_id>/eliminar", methods=["POST"])
-    def eliminar_libro(libro_id):
-        """Elimina un libro registrado."""
-        try:
-            filas_eliminadas = LibroDAO.eliminar(libro_id)
-
-            if filas_eliminadas:
-                flash("Libro eliminado correctamente.", "exito")
-            else:
-                flash("El libro solicitado no existe.", "error")
-
-        except Exception:
-            flash(
-                "No fue posible eliminar el libro. "
-                "Puede tener préstamos asociados.",
-                "error",
-            )
-
-        return redirect(url_for("inicio"))
     return app

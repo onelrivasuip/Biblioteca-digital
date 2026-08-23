@@ -1,6 +1,7 @@
 # Python
 __pycache__/
 *.py[cod]
+*.egg-info/
 
 # Virtual environments
 .venv/
@@ -15,15 +16,12 @@ env/
 .ruff_cache/
 .pytest_cache/
 
-# Flet
-.flet/
-build/
-storage/
+# Logs
+logs/*.log
 
 # IDE
 .idea/
 .vscode/
 
 # macOS
-.DS_Storebiblioteca_app.egg-info/
-.env
+.DS_Store

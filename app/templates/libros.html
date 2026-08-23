@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block titulo %}Libros — Biblioteca Central{% endblock %}
+
+{% block contenido %}
+
+<section class="panel" id="libros">
+
+    <h2>Registrar nuevo libro</h2>
+
+    <form class="formulario" method="post" action="{{ url_for('libros.index') }}">
+
+        <div class="campos">
+            <input
+                type="text"
+                name="titulo"
+                placeholder="Título"
+                required
+            >
+
+            <input
+                type="text"
+                name="autor"
+                placeholder="Autor"
+                required
+            >
+
+            <input
+                type="text"
+                name="isbn"
+                placeholder="ISBN"
+                required
+            >
+
+            <input
+                type="text"
+                name="categoria"
+                placeholder="Categoría (opcional)"
+            >
+        </div>
+
+        <button
+            class="boton-principal"
+            type="submit"
+        >
+            ＋ Agregar libro
+        </button>
+
+    </form>
+
+    <hr>
+
+    <h2>Inventario</h2>
+
+    <form class="busqueda" method="get" action="{{ url_for('libros.index') }}">
+        <input
+            type="text"
+            name="q"
+            placeholder="Buscar por título, autor o ISBN..."
+            value="{{ texto_busqueda }}"
+        >
+        <button class="boton-secundario" type="submit">Buscar</button>
+        {% if texto_busqueda %}
+        <a class="boton-secundario" href="{{ url_for('libros.index') }}">Limpiar</a>
+        {% endif %}
+    </form>
+
+    {% if libros %}
+
+        <div class="inventario">
+
+            {% for libro in libros %}
+
+                <article class="libro">
+                    <div>
+                        <strong>
+                            {{ libro.titulo }}
+                        </strong>
+
+                        <p>
+                            {{ libro.autor }}
+                            · ISBN: {{ libro.isbn }}
+                            {% if libro.categoria %} · {{ libro.categoria }}{% endif %}
+                        </p>
+                    </div>
+
+                    <span class="estado {{ 'disponible' if libro.disponible else 'prestado' }}">
+                        {{ 'Disponible' if libro.disponible else 'Prestado' }}
+                    </span>
+
+                    <div class="acciones">
+                        <a
+                            class="boton-secundario"
+                            href="{{ url_for('libros.editar', libro_id=libro.id) }}"
+                        >Editar</a>
+
+                        <form
+                            method="post"
+                            action="{{ url_for('libros.eliminar', libro_id=libro.id) }}"
+                            onsubmit="return confirm('¿Eliminar este libro?');"
+                        >
+                            <button type="submit">Eliminar</button>
+                        </form>
+                    </div>
+                </article>
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <p class="vacio">
+            {% if texto_busqueda %}
+                No se encontraron libros para «{{ texto_busqueda }}».
+            {% else %}
+                No hay libros registrados todavía.
+            {% endif %}
+        </p>
+
+    {% endif %}
+
+</section>
+
+{% endblock %}
